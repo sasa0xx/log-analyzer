@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 )
@@ -16,8 +15,10 @@ func main() {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
+	analyzer := NewAnalyzer()
 	for scanner.Scan() {
 		line := scanner.Text()
-		fmt.Println(line)
+		ParseLogLine(line, analyzer)
 	}
+	print(analyzer.Summarize())
 }
