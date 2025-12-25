@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func ParseLogLine(line string, analyzer *Analyzer) LogEntry {
+func ParseLogLine(line string) LogEntry {
 	splits := strings.SplitN(line, " ", 2)
 	level := splits[0]
 	if !slices.Contains([]string{"ERROR", "INFO", "DEBUG", "WARN"}, level) {
@@ -14,6 +14,5 @@ func ParseLogLine(line string, analyzer *Analyzer) LogEntry {
 	}
 
 	entry := LogEntry{level, splits[1]}
-	analyzer.Add(entry)
 	return entry
 }

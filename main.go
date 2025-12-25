@@ -2,8 +2,10 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
+	"sync"
 )
 
 func main() {
@@ -13,12 +15,31 @@ func main() {
 	}
 
 	defer file.Close()
+	var wg sync.WaitGroup
+
+	jobs := make(chan string)
+	results := make(chan LogEntry)
+	jobsWorkers := 4
+	analyzer := NewAnalyzer()
+
+	for range make([]struct{}, jobsWorkers) {
+		go worker(jobs, results)
+	}
+	go func() {
+		for entry := range results {
+			analyzer.Add(entry)
+			wg.Done()
+		}
+	}()
 
 	scanner := bufio.NewScanner(file)
-	analyzer := NewAnalyzer()
 	for scanner.Scan() {
 		line := scanner.Text()
-		ParseLogLine(line, analyzer)
+		wg.Add(1)
+		jobs <- line
 	}
-	print(analyzer.Summarize())
+	close(jobs)
+
+	wg.Wait()
+	fmt.Println(analyzer.Summarize())
 }
