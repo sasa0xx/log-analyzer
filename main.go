@@ -19,10 +19,10 @@ func main() {
 
 	jobs := make(chan string)
 	results := make(chan LogEntry)
-	jobsWorkers := 4
+	numWorkers := 4
 	analyzer := NewAnalyzer()
 
-	for range make([]struct{}, jobsWorkers) {
+	for range make([]struct{}, numWorkers) {
 		go worker(jobs, results)
 	}
 	go func() {
@@ -39,7 +39,8 @@ func main() {
 		jobs <- line
 	}
 	close(jobs)
-
 	wg.Wait()
+	close(results)
+
 	fmt.Println(analyzer.Summarize())
 }
